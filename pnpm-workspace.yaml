@@ -1,0 +1,20 @@
+packages:
+  - .
+
+minimumReleaseAge: 0
+
+allowBuilds:
+  '@google/genai': true
+  '@parcel/watcher': true
+  '@swc/core': true
+  protobufjs: true
+  sharp: true
+  unrs-resolver: true
+
+onlyBuiltDependencies:
+  - '@google/genai'
+  - '@parcel/watcher'
+  - '@swc/core'
+  - protobufjs
+  - sharp
+  - unrs-resolver
