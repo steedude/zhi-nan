@@ -2,6 +2,16 @@
 
 import type { Gender } from '@/types/bazi'
 import { useTranslations } from 'next-intl'
+import { Button } from '@/components/ui/button'
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
 
 /** 第二步:輸入陽曆生辰與性別 */
 
@@ -33,69 +43,77 @@ export default function BirthStep({
   const t = useTranslations('birth')
 
   return (
-    <section className="card animate-fade-up p-6 sm:p-8">
-      <h2 className="font-display mb-1 text-xl text-stone-800">{t('title')}</h2>
-      <p className="mb-5 text-sm text-stone-500">{t('desc')}</p>
+    <Card className="animate-fade-up">
+      <CardHeader className="p-6 pb-5 sm:p-8 sm:pb-5">
+        <CardTitle>{t('title')}</CardTitle>
+        <CardDescription>{t('desc')}</CardDescription>
+      </CardHeader>
 
-      <div className="space-y-4">
+      <CardContent className="space-y-4 p-6 pt-0 sm:p-8 sm:pt-0">
         <div>
-          <label htmlFor="birth-date" className="mb-1 block text-sm text-stone-600">
+          <Label htmlFor="birth-date" className="mb-1 block text-stone-600">
             {t('dateLabel')}
-          </label>
-          <input
+          </Label>
+          <Input
             id="birth-date"
             type="date"
             value={date}
             min="1900-01-01"
             max="2100-12-31"
             onChange={(e) => onDateChange(e.target.value)}
-            className="input-field"
           />
         </div>
 
         <div>
-          <label htmlFor="birth-time" className="mb-1 block text-sm text-stone-600">
+          <Label htmlFor="birth-time" className="mb-1 block text-stone-600">
             {t('timeLabel')}
-          </label>
-          <input
+          </Label>
+          <Input
             id="birth-time"
             type="time"
             value={time}
             onChange={(e) => onTimeChange(e.target.value)}
-            className="input-field"
           />
         </div>
 
         <div>
-          <span className="mb-1 block text-sm text-stone-600">{t('genderLabel')}</span>
+          <Label className="mb-1 block text-stone-600">{t('genderLabel')}</Label>
           <div className="grid grid-cols-2 gap-3">
             {(['female', 'male'] as const).map((g) => (
-              <button
+              <Button
                 key={g}
+                type="button"
+                variant={gender === g ? 'secondary' : 'outline'}
                 onClick={() => onGenderChange(g)}
-                className={`rounded-xl border py-3 transition-all duration-200 ${
+                className={`h-12 rounded-xl ${
                   gender === g
-                    ? 'border-teal-600 bg-teal-50 text-teal-800 shadow-[0_2px_10px_rgba(13,148,136,.12)]'
+                    ? 'border border-teal-600 bg-teal-50 text-teal-800 shadow-[0_2px_10px_rgba(13,148,136,.12)] hover:bg-teal-50'
                     : 'border-stone-300 text-stone-500 hover:border-stone-400 hover:text-stone-700'
                 }`}
               >
                 {g === 'female' ? t('female') : t('male')}
-              </button>
+              </Button>
             ))}
           </div>
         </div>
-      </div>
 
-      {error && <p className="mt-4 text-sm text-red-600">{error}</p>}
+        {error && <p className="text-sm text-red-600">{error}</p>}
 
-      <div className="mt-6 flex gap-3">
-        <button onClick={onBack} disabled={loading} className="btn-ghost px-5 py-3">
-          {t('back')}
-        </button>
-        <button onClick={onSubmit} disabled={loading} className="btn-primary flex-1 py-3">
-          {loading ? t('submitting') : t('submit')}
-        </button>
-      </div>
-    </section>
+        <div className="flex gap-3 pt-2">
+          <Button type="button" onClick={onBack} disabled={loading} variant="outline">
+            {t('back')}
+          </Button>
+          <Button
+            type="button"
+            onClick={onSubmit}
+            disabled={loading}
+            variant="brand"
+            className="flex-1"
+          >
+            {loading ? t('submitting') : t('submit')}
+          </Button>
+        </div>
+      </CardContent>
+    </Card>
   )
 }

@@ -6,6 +6,8 @@ import Link from 'next/link'
 import { useCallback, useEffect, useState } from 'react'
 import { useLocale, useTranslations } from 'next-intl'
 import BaziChartCard from '@/components/BaziChartCard'
+import { Button } from '@/components/ui/button'
+import { Card, CardContent } from '@/components/ui/card'
 import { useUser } from '@/hooks/useUser'
 import { createClient, isSupabaseConfigured } from '@/lib/supabase/client'
 
@@ -65,12 +67,14 @@ export default function HistoryPage() {
         text={history('needLogin')}
         backHome={common('backHome')}
         action={
-          <button
+          <Button
+            type="button"
             onClick={() => window.dispatchEvent(new CustomEvent('open-auth'))}
-            className="btn-primary mt-4 px-6 py-2.5"
+            variant="brand"
+            className="mt-4"
           >
             {common('login')}
-          </button>
+          </Button>
         }
       />
     )
@@ -94,46 +98,52 @@ export default function HistoryPage() {
           {readings.map((r) => {
             const expanded = expandedId === r.id
             return (
-              <li key={r.id} className="card animate-fade-up overflow-hidden">
-                <button
-                  onClick={() => setExpandedId(expanded ? null : r.id)}
-                  className="flex w-full items-start justify-between gap-3 p-5 text-left transition hover:bg-stone-50"
-                >
-                  <div className="min-w-0">
-                    <div className="mb-1 flex items-center gap-2 text-xs text-stone-500">
-                      <span className="rounded-full border border-stone-300 px-2 py-0.5">
-                        {r.category}
-                      </span>
-                      <span>
-                        {new Date(r.created_at).toLocaleDateString(locale, {
-                          year: 'numeric',
-                          month: 'long',
-                          day: 'numeric',
-                        })}
-                      </span>
+              <Card key={r.id} asChild className="animate-fade-up overflow-hidden">
+                <li>
+                  <Button
+                    type="button"
+                    onClick={() => setExpandedId(expanded ? null : r.id)}
+                    variant="ghost"
+                    className="h-auto w-full items-start justify-between gap-3 rounded-none p-5 text-left hover:bg-stone-50"
+                  >
+                    <div className="min-w-0">
+                      <div className="mb-1 flex items-center gap-2 text-xs text-stone-500">
+                        <span className="rounded-full border border-stone-300 px-2 py-0.5">
+                          {r.category}
+                        </span>
+                        <span>
+                          {new Date(r.created_at).toLocaleDateString(locale, {
+                            year: 'numeric',
+                            month: 'long',
+                            day: 'numeric',
+                          })}
+                        </span>
+                      </div>
+                      <p className="truncate text-stone-700">{r.question}</p>
                     </div>
-                    <p className="truncate text-stone-700">{r.question}</p>
-                  </div>
-                  <span className="mt-1 shrink-0 text-stone-400">
-                    {expanded ? history('collapse') : history('expand')}
-                  </span>
-                </button>
+                    <span className="mt-1 shrink-0 text-stone-400">
+                      {expanded ? history('collapse') : history('expand')}
+                    </span>
+                  </Button>
 
-                {expanded && (
-                  <div className="space-y-4 border-t border-stone-200 p-5">
-                    <BaziChartCard chart={r.chart} />
-                    <div className="whitespace-pre-wrap text-[15px] leading-7 text-stone-700">
-                      {r.interpretation}
-                    </div>
-                    <button
-                      onClick={() => remove(r.id)}
-                      className="text-xs text-red-600/80 transition hover:text-red-600"
-                    >
-                      {history('remove')}
-                    </button>
-                  </div>
-                )}
-              </li>
+                  {expanded && (
+                    <CardContent className="space-y-4 border-t border-stone-200 p-5">
+                      <BaziChartCard chart={r.chart} />
+                      <div className="whitespace-pre-wrap text-[15px] leading-7 text-stone-700">
+                        {r.interpretation}
+                      </div>
+                      <Button
+                        type="button"
+                        onClick={() => remove(r.id)}
+                        variant="link"
+                        className="h-auto p-0 text-xs text-red-600/80 hover:text-red-600"
+                      >
+                        {history('remove')}
+                      </Button>
+                    </CardContent>
+                  )}
+                </li>
+              </Card>
             )
           })}
         </ul>

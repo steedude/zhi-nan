@@ -10,6 +10,8 @@ import BirthStep from '@/components/BirthStep'
 import InterpretationCard from '@/components/InterpretationCard'
 import QuestionStep from '@/components/QuestionStep'
 import StepIndicator from '@/components/StepIndicator'
+import { Button } from '@/components/ui/button'
+import { Card } from '@/components/ui/card'
 import { useUser } from '@/hooks/useUser'
 import { computeBazi } from '@/lib/bazi'
 import { isSupabaseConfigured } from '@/lib/supabase/client'
@@ -153,21 +155,28 @@ export default function Home() {
 
             {/* 訪客轉會員的引導(變現流程的第一步) */}
             {!streaming && isSupabaseConfigured && !user && (
-              <div className="animate-fade-up flex flex-col items-center gap-3 rounded-2xl border border-teal-200 bg-gradient-to-b from-teal-50 to-transparent p-5 text-center sm:flex-row sm:justify-between sm:text-left">
+              <Card className="animate-fade-up flex flex-col items-center gap-3 border-teal-200 bg-gradient-to-b from-teal-50 to-transparent p-5 text-center sm:flex-row sm:justify-between sm:text-left">
                 <p className="text-sm text-stone-600">{home('bannerText')}</p>
-                <button
+                <Button
+                  type="button"
                   onClick={() => window.dispatchEvent(new CustomEvent('open-auth'))}
-                  className="btn-primary shrink-0 px-5 py-2.5 text-sm"
+                  variant="brand"
+                  className="shrink-0"
                 >
                   {home('bannerCta')}
-                </button>
-              </div>
+                </Button>
+              </Card>
             )}
 
             {!streaming && (
-              <button onClick={reset} className="btn-ghost w-full py-3">
+              <Button
+                type="button"
+                onClick={reset}
+                variant="outline"
+                className="w-full border-stone-300 text-stone-500 hover:text-stone-700"
+              >
                 {home('askAgain')}
-              </button>
+              </Button>
             )}
           </div>
         )}

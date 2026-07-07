@@ -2,6 +2,7 @@
 
 import type { BaziChart } from '@/types/bazi'
 import { useTranslations } from 'next-intl'
+import { Card, CardContent } from '@/components/ui/card'
 
 /**
  * 命盤卡片:四柱、藏干、五行分布、大運
@@ -43,109 +44,111 @@ export default function BaziChartCard({ chart }: { chart: BaziChart }) {
   const t = useTranslations('chart')
 
   return (
-    <section className="card animate-fade-up p-6 sm:p-8">
-      <h2 className="font-display mb-1 text-xl text-stone-800">{t('title')}</h2>
-      <p className="mb-5 text-sm text-stone-500">
-        {chart.solarDate}・{chart.lunarDate}・{t('zodiacPrefix')}
-        {chart.shengXiao}
-      </p>
+    <Card className="animate-fade-up">
+      <CardContent className="p-6 sm:p-8">
+        <h2 className="font-display mb-1 text-xl text-stone-800">{t('title')}</h2>
+        <p className="mb-5 text-sm text-stone-500">
+          {chart.solarDate}・{chart.lunarDate}・{t('zodiacPrefix')}
+          {chart.shengXiao}
+        </p>
 
-      {/* 四柱:頂部飾條為天干→地支的五行漸層 */}
-      <div className="grid grid-cols-4 gap-2 text-center sm:gap-3">
-        {chart.pillars.map((p) => (
-          <div
-            key={p.label}
-            className="overflow-hidden rounded-xl border border-stone-200 bg-white/80 pb-4 shadow-[0_2px_10px_rgba(68,60,48,.05)] transition-transform duration-200 hover:-translate-y-0.5"
-          >
+        {/* 四柱:頂部飾條為天干→地支的五行漸層 */}
+        <div className="grid grid-cols-4 gap-2 text-center sm:gap-3">
+          {chart.pillars.map((p) => (
             <div
-              className="h-[3px] w-full"
-              style={{
-                background: `linear-gradient(90deg, ${WUXING_HEX[p.ganWuXing]}, ${WUXING_HEX[p.zhiWuXing]})`,
-              }}
-            />
-            <div className="mt-3 text-xs text-stone-500">{p.label}</div>
-            <div className="mt-1 text-[11px] text-stone-400">{p.shiShenGan}</div>
-            <div
-              className={`font-display mt-1 text-2xl font-semibold sm:text-3xl ${WUXING_TEXT[p.ganWuXing]}`}
+              key={p.label}
+              className="overflow-hidden rounded-xl border border-stone-200 bg-white/80 pb-4 shadow-[0_2px_10px_rgba(68,60,48,.05)] transition-transform duration-200 hover:-translate-y-0.5"
             >
-              {p.gan}
-            </div>
-            <div
-              className={`font-display text-2xl font-semibold sm:text-3xl ${WUXING_TEXT[p.zhiWuXing]}`}
-            >
-              {p.zhi}
-            </div>
-            <div className="mt-2 text-[11px] leading-4 text-stone-400">
-              {t('hiddenPrefix')}
-              {p.hideGan.join('・')}
-            </div>
-          </div>
-        ))}
-      </div>
-
-      {/* 日主與五行分布 */}
-      <div className="mt-5 space-y-3">
-        <div className="text-sm text-stone-600">
-          {t('dayMaster')}:
-          <span
-            className={`font-display text-base ${WUXING_TEXT[chart.dayMasterWuXing]}`}
-          >
-            {chart.dayMaster}
-          </span>
-          <span className="ml-1 text-stone-500">({chart.dayMasterWuXing})</span>
-        </div>
-
-        <div>
-          <div className="mb-1.5 flex justify-between text-xs text-stone-500">
-            <span>{t('wuxingTitle')}</span>
-            <span>
-              {Object.entries(chart.wuXingCount)
-                .filter(([, v]) => v === 0)
-                .map(([k]) => `${t('lackPrefix')}${k}`)
-                .join('、') || t('wuxingAll')}
-            </span>
-          </div>
-          <div className="flex h-2.5 gap-0.5 overflow-hidden rounded-full">
-            {Object.entries(chart.wuXingCount).map(([element, count]) =>
-              count > 0 ? (
-                <div
-                  key={element}
-                  className={WUXING_BAR[element]}
-                  style={{ width: `${(count / TOTAL_WUXING) * 100}%` }}
-                  title={`${element} ${count}`}
-                />
-              ) : null,
-            )}
-          </div>
-          <div className="mt-1.5 flex gap-3 text-xs">
-            {Object.entries(chart.wuXingCount).map(([element, count]) => (
-              <span key={element} className="text-stone-500">
-                <span className={WUXING_TEXT[element]}>{element}</span> {count}
-              </span>
-            ))}
-          </div>
-        </div>
-      </div>
-
-      {/* 大運 */}
-      {chart.daYun.length > 0 && (
-        <div className="mt-5 border-t border-stone-200 pt-4">
-          <div className="mb-2 text-sm text-stone-500">{t('daYun')}</div>
-          <div className="flex flex-wrap gap-2">
-            {chart.daYun.map((d) => (
-              <span
-                key={d.startYear}
-                className="rounded-lg border border-stone-200 bg-white/70 px-3 py-1 text-sm text-stone-600"
-                title={`${d.startYear}${t('startYearSuffix')}`}
+              <div
+                className="h-[3px] w-full"
+                style={{
+                  background: `linear-gradient(90deg, ${WUXING_HEX[p.ganWuXing]}, ${WUXING_HEX[p.zhiWuXing]})`,
+                }}
+              />
+              <div className="mt-3 text-xs text-stone-500">{p.label}</div>
+              <div className="mt-1 text-[11px] text-stone-400">{p.shiShenGan}</div>
+              <div
+                className={`font-display mt-1 text-2xl font-semibold sm:text-3xl ${WUXING_TEXT[p.ganWuXing]}`}
               >
-                {t('agePrefix')}
-                {d.startAge}
-                {t('ageSuffix')} <span className="font-display">{d.ganZhi}</span>
+                {p.gan}
+              </div>
+              <div
+                className={`font-display text-2xl font-semibold sm:text-3xl ${WUXING_TEXT[p.zhiWuXing]}`}
+              >
+                {p.zhi}
+              </div>
+              <div className="mt-2 text-[11px] leading-4 text-stone-400">
+                {t('hiddenPrefix')}
+                {p.hideGan.join('・')}
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* 日主與五行分布 */}
+        <div className="mt-5 space-y-3">
+          <div className="text-sm text-stone-600">
+            {t('dayMaster')}:
+            <span
+              className={`font-display text-base ${WUXING_TEXT[chart.dayMasterWuXing]}`}
+            >
+              {chart.dayMaster}
+            </span>
+            <span className="ml-1 text-stone-500">({chart.dayMasterWuXing})</span>
+          </div>
+
+          <div>
+            <div className="mb-1.5 flex justify-between text-xs text-stone-500">
+              <span>{t('wuxingTitle')}</span>
+              <span>
+                {Object.entries(chart.wuXingCount)
+                  .filter(([, v]) => v === 0)
+                  .map(([k]) => `${t('lackPrefix')}${k}`)
+                  .join('、') || t('wuxingAll')}
               </span>
-            ))}
+            </div>
+            <div className="flex h-2.5 gap-0.5 overflow-hidden rounded-full">
+              {Object.entries(chart.wuXingCount).map(([element, count]) =>
+                count > 0 ? (
+                  <div
+                    key={element}
+                    className={WUXING_BAR[element]}
+                    style={{ width: `${(count / TOTAL_WUXING) * 100}%` }}
+                    title={`${element} ${count}`}
+                  />
+                ) : null,
+              )}
+            </div>
+            <div className="mt-1.5 flex gap-3 text-xs">
+              {Object.entries(chart.wuXingCount).map(([element, count]) => (
+                <span key={element} className="text-stone-500">
+                  <span className={WUXING_TEXT[element]}>{element}</span> {count}
+                </span>
+              ))}
+            </div>
           </div>
         </div>
-      )}
-    </section>
+
+        {/* 大運 */}
+        {chart.daYun.length > 0 && (
+          <div className="mt-5 border-t border-stone-200 pt-4">
+            <div className="mb-2 text-sm text-stone-500">{t('daYun')}</div>
+            <div className="flex flex-wrap gap-2">
+              {chart.daYun.map((d) => (
+                <span
+                  key={d.startYear}
+                  className="rounded-lg border border-stone-200 bg-white/70 px-3 py-1 text-sm text-stone-600"
+                  title={`${d.startYear}${t('startYearSuffix')}`}
+                >
+                  {t('agePrefix')}
+                  {d.startAge}
+                  {t('ageSuffix')} <span className="font-display">{d.ganZhi}</span>
+                </span>
+              ))}
+            </div>
+          </div>
+        )}
+      </CardContent>
+    </Card>
   )
 }

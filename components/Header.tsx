@@ -7,6 +7,7 @@ import type { Locale } from '@/types/i18n'
 import { useLocaleSwitcher } from '@/hooks/useLocaleSwitcher'
 import { useUser } from '@/hooks/useUser'
 import { createClient, isSupabaseConfigured } from '@/lib/supabase/client'
+import { Button } from '@/components/ui/button'
 import AuthDialog from './AuthDialog'
 
 /**
@@ -48,13 +49,16 @@ export default function Header() {
 
         <nav className="flex items-center gap-3 text-sm">
           {/* 語言切換 */}
-          <button
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm"
             onClick={() => setLocale(locale === 'zh-TW' ? 'en' : 'zh-TW')}
-            className="rounded-lg px-2 py-1 text-xs text-stone-500 transition hover:text-teal-700"
+            className="h-8 px-2 text-xs text-stone-500 hover:text-teal-700"
             aria-label="Switch language"
           >
             {locale === 'zh-TW' ? 'EN' : '中'}
-          </button>
+          </Button>
 
           {isSupabaseConfigured &&
             (user ? (
@@ -65,17 +69,25 @@ export default function Header() {
                 >
                   {t('history')}
                 </Link>
-                <button onClick={signOut} className="btn-ghost px-3 py-1.5">
+                <Button
+                  type="button"
+                  onClick={signOut}
+                  variant="outline"
+                  size="sm"
+                  className="border-stone-300 text-stone-500 hover:text-stone-700"
+                >
                   {t('logout')}
-                </button>
+                </Button>
               </>
             ) : (
-              <button
+              <Button
+                type="button"
                 onClick={() => setAuthOpen(true)}
-                className="btn-primary px-4 py-1.5 text-sm"
+                variant="brand"
+                size="sm"
               >
                 {t('login')}
-              </button>
+              </Button>
             ))}
         </nav>
       </div>

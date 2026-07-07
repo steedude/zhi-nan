@@ -7,6 +7,15 @@ import { useForm } from 'react-hook-form'
 import { useTranslations } from 'next-intl'
 import { createClient } from '@/lib/supabase/client'
 import { authSchema } from '@/lib/validation/auth'
+import { Button } from '@/components/ui/button'
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog'
+import { Input } from '@/components/ui/input'
 
 /** 登入 / 註冊對話框(Email + 密碼) */
 
@@ -35,8 +44,6 @@ export default function AuthDialog({ open, onClose }: Props) {
       password: '',
     },
   })
-
-  if (!open) return null
 
   async function submit({ email, password }: AuthFormValues) {
     setError('')
@@ -78,39 +85,27 @@ export default function AuthDialog({ open, onClose }: Props) {
   }
 
   return (
-    <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-stone-900/35 p-4 backdrop-blur-sm"
-      onClick={onClose}
-    >
-      <div
-        className="card animate-fade-up w-full max-w-sm p-6"
-        onClick={(e) => e.stopPropagation()}
-      >
-        <div className="mb-5 flex items-center justify-between">
-          <h2 className="font-display text-lg text-stone-800">
+    <Dialog open={open} onOpenChange={(next) => !next && onClose()}>
+      <DialogContent aria-label={t('close')}>
+        <DialogHeader>
+          <DialogTitle>
             {mode === 'signin' ? t('signinTitle') : t('signupTitle')}
-          </h2>
-          <button
-            onClick={onClose}
-            aria-label={t('close')}
-            className="text-stone-400 transition hover:text-stone-700"
-          >
-            ✕
-          </button>
-        </div>
+          </DialogTitle>
+          <DialogDescription>{t('hint')}</DialogDescription>
+        </DialogHeader>
 
         <form onSubmit={handleSubmit(submit)} className="space-y-3">
-          <input
+          <Input
             type="email"
             {...register('email')}
             placeholder={t('email')}
-            className="input-field"
+            aria-invalid={!!errors.email}
           />
-          <input
+          <Input
             type="password"
             {...register('password')}
             placeholder={t('password')}
-            className="input-field"
+            aria-invalid={!!errors.password}
           />
 
           {(errors.email || errors.password) && (
@@ -119,28 +114,28 @@ export default function AuthDialog({ open, onClose }: Props) {
           {error && <p className="text-sm text-red-600">{error}</p>}
           {notice && <p className="text-sm text-emerald-600">{notice}</p>}
 
-          <button type="submit" disabled={loading} className="btn-primary w-full py-3">
+          <Button type="submit" disabled={loading} variant="brand" className="w-full">
             {loading ? t('processing') : mode === 'signin' ? t('signin') : t('signup')}
-          </button>
+          </Button>
         </form>
 
         <p className="mt-4 text-center text-sm text-stone-500">
           {mode === 'signin' ? t('noAccount') : t('hasAccount')}
-          <button
+          <Button
+            type="button"
+            variant="link"
             onClick={() => {
               setMode(mode === 'signin' ? 'signup' : 'signin')
               setError('')
               setNotice('')
               reset()
             }}
-            className="ml-1 text-teal-700 transition hover:text-teal-600"
+            className="ml-1 h-auto p-0 text-teal-700 hover:text-teal-600"
           >
             {mode === 'signin' ? t('toSignup') : t('toSignin')}
-          </button>
+          </Button>
         </p>
-
-        <p className="mt-3 text-center text-xs text-stone-400">{t('hint')}</p>
-      </div>
-    </div>
+      </DialogContent>
+    </Dialog>
   )
 }
