@@ -19,7 +19,7 @@ const minuteLimiter =
   new Ratelimit({
     redis,
     limiter: Ratelimit.slidingWindow(PER_MINUTE_LIMIT, '1 m'),
-    prefix: 'suan-ming:minute',
+    prefix: 'zhi-nan:minute',
   })
 
 const anonDailyLimiter =
@@ -27,7 +27,7 @@ const anonDailyLimiter =
   new Ratelimit({
     redis,
     limiter: Ratelimit.fixedWindow(ANON_DAILY_LIMIT, '1 d'),
-    prefix: 'suan-ming:anon-day',
+    prefix: 'zhi-nan:anon-day',
   })
 
 export async function isMinuteLimited(ip: string): Promise<boolean> {

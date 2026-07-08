@@ -1,6 +1,6 @@
-# 問命|AI 八字解讀網站
+# 指南 | AI 八字決策指引網站
 
-給人生困惑的人一點方向。使用者先寫下自己的問題,再輸入生辰,網站立即排出八字命盤,並由 AI 以串流方式生成溫暖、務實的解讀與建議。
+給正在卡關、需要方向感的人一份指南。使用者先寫下自己的問題,再輸入生辰,網站立即排出八字命盤,並由 AI 以串流方式生成溫暖、務實的解讀與建議。
 
 ## 功能特色
 
@@ -78,17 +78,18 @@ pnpm dev
 
 ## 環境變數
 
-| 變數                                   | 必填 | 說明                                 |
-| -------------------------------------- | ---- | ------------------------------------ |
-| `GEMINI_API_KEY`                       | ✅   | Google AI Studio 申請的 API Key      |
-| `GEMINI_MODEL`                         | ❌   | 使用的模型,預設 `gemini-2.5-flash`   |
-| `NEXT_PUBLIC_SUPABASE_URL`             | ❌   | Supabase 專案網址(會員功能用)        |
-| `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` | ❌   | Supabase publishable key(會員功能用) |
-| `ANON_DAILY_LIMIT`                     | ❌   | 訪客每日解讀次數,預設 3              |
-| `MEMBER_DAILY_LIMIT`                   | ❌   | 會員每日解讀次數,預設 10             |
-| `PER_MINUTE_LIMIT`                     | ❌   | 每 IP 每分鐘請求上限,預設 6          |
-| `UPSTASH_REDIS_REST_URL`               | ❌   | Upstash Redis REST URL,正式限流用    |
-| `UPSTASH_REDIS_REST_TOKEN`             | ❌   | Upstash Redis REST Token             |
+| 變數                                   | 必填 | 說明                                           |
+| -------------------------------------- | ---- | ---------------------------------------------- |
+| `GEMINI_API_KEY`                       | ✅   | Google AI Studio 申請的 API Key                |
+| `GEMINI_MODEL`                         | ❌   | 使用的模型,預設 `gemini-2.5-flash`             |
+| `NEXT_PUBLIC_SITE_URL`                 | ❌   | 正式網站網址,預設 `https://zhinan.3854335.com` |
+| `NEXT_PUBLIC_SUPABASE_URL`             | ❌   | Supabase 專案網址(會員功能用)                  |
+| `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` | ❌   | Supabase publishable key(會員功能用)           |
+| `ANON_DAILY_LIMIT`                     | ❌   | 訪客每日解讀次數,預設 3                        |
+| `MEMBER_DAILY_LIMIT`                   | ❌   | 會員每日解讀次數,預設 10                       |
+| `PER_MINUTE_LIMIT`                     | ❌   | 每 IP 每分鐘請求上限,預設 6                    |
+| `UPSTASH_REDIS_REST_URL`               | ❌   | Upstash Redis REST URL,正式限流用              |
+| `UPSTASH_REDIS_REST_TOKEN`             | ❌   | Upstash Redis REST Token                       |
 
 環境變數會由 [`env.ts`](env.ts) 以 Zod 驗證。未設定 Upstash 時會退回記憶體限流,方便本機開發;正式部署到 Vercel/serverless 多實例時建議設定 Upstash,避免免費額度被多實例放大。
 

@@ -9,7 +9,7 @@ import type { Dictionary } from '@/types/i18n'
  */
 export const en = {
   common: {
-    siteName: 'BaziAsk',
+    siteName: 'Zhi Nan',
     login: 'Sign in',
     logout: 'Sign out',
     history: 'My readings',

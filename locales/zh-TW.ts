@@ -8,7 +8,7 @@ import type { QuestionCategory } from '@/configs/questions'
  */
 export const zhTW = {
   common: {
-    siteName: '問命',
+    siteName: '指南',
     login: '登入',
     logout: '登出',
     history: '我的紀錄',

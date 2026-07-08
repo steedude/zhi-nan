@@ -107,7 +107,7 @@ export default function ReadingWizard() {
       <div className="mx-auto max-w-2xl px-5 py-12 sm:py-16">
         <header className="mb-8 text-center">
           <h1 className="font-display text-4xl font-semibold tracking-[0.3em] text-stone-800 sm:text-5xl">
-            問 命
+            指 南
           </h1>
           <div className="mx-auto mt-4 flex items-center justify-center gap-3 text-teal-700/70">
             <span className="h-px w-12 bg-gradient-to-r from-transparent to-teal-700/50" />
