@@ -79,6 +79,8 @@ export default function AuthDialog({ open, onClose }: Props) {
           setNotice(t('confirmSent'))
         }
       }
+    } catch {
+      setError(t(mode === 'signin' ? 'errSignin' : 'errSignup'))
     } finally {
       setLoading(false)
     }
@@ -86,7 +88,7 @@ export default function AuthDialog({ open, onClose }: Props) {
 
   return (
     <Dialog open={open} onOpenChange={(next) => !next && onClose()}>
-      <DialogContent aria-label={t('close')}>
+      <DialogContent closeLabel={t('close')}>
         <DialogHeader>
           <DialogTitle>
             {mode === 'signin' ? t('signinTitle') : t('signupTitle')}
@@ -97,29 +99,33 @@ export default function AuthDialog({ open, onClose }: Props) {
         <form onSubmit={handleSubmit(submit)} className="space-y-3">
           <Input
             type="email"
+            aria-label={t('email')}
+            autoComplete="email"
             {...register('email')}
             placeholder={t('email')}
             aria-invalid={!!errors.email}
           />
           <Input
             type="password"
+            aria-label={t('password')}
+            autoComplete={mode === 'signin' ? 'current-password' : 'new-password'}
             {...register('password')}
             placeholder={t('password')}
             aria-invalid={!!errors.password}
           />
 
           {(errors.email || errors.password) && (
-            <p className="text-sm text-red-600">{t('errInvalid')}</p>
+            <p className="text-sm text-destructive">{t('errInvalid')}</p>
           )}
-          {error && <p className="text-sm text-red-600">{error}</p>}
-          {notice && <p className="text-sm text-emerald-600">{notice}</p>}
+          {error && <p className="text-sm text-destructive">{error}</p>}
+          {notice && <p className="text-sm text-success">{notice}</p>}
 
           <Button type="submit" disabled={loading} variant="brand" className="w-full">
             {loading ? t('processing') : mode === 'signin' ? t('signin') : t('signup')}
           </Button>
         </form>
 
-        <p className="mt-4 text-center text-sm text-stone-500">
+        <p className="mt-4 text-center text-sm text-muted-foreground">
           {mode === 'signin' ? t('noAccount') : t('hasAccount')}
           <Button
             type="button"
@@ -130,7 +136,7 @@ export default function AuthDialog({ open, onClose }: Props) {
               setNotice('')
               reset()
             }}
-            className="ml-1 h-auto p-0 text-teal-700 hover:text-teal-600"
+            className="ml-1 h-auto p-0 text-primary hover:text-primary/90"
           >
             {mode === 'signin' ? t('toSignup') : t('toSignin')}
           </Button>

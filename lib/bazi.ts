@@ -1,4 +1,4 @@
-import type { BaziChart, BirthInput, DaYun, Pillar } from '@/types/bazi'
+import type { BaziChart, BirthInput, DaYun, Pillar, WuXing } from '@/types/bazi'
 import { Solar } from 'lunar-typescript'
 import { pad } from '@/utils/date'
 import { toTraditional } from '@/utils/zh'
@@ -17,7 +17,7 @@ import { toTraditional } from '@/utils/zh'
  */
 
 /** 天干 → 五行 */
-const GAN_WUXING: Record<string, string> = {
+const GAN_WUXING: Record<string, WuXing> = {
   甲: '木',
   乙: '木',
   丙: '火',
@@ -31,7 +31,7 @@ const GAN_WUXING: Record<string, string> = {
 }
 
 /** 地支 → 五行 */
-const ZHI_WUXING: Record<string, string> = {
+const ZHI_WUXING: Record<string, WuXing> = {
   子: '水',
   丑: '土',
   寅: '木',
@@ -113,7 +113,7 @@ export function computeBazi(input: BirthInput): BaziChart {
   ]
 
   // 統計四干四支的五行分布
-  const wuXingCount: Record<string, number> = { 木: 0, 火: 0, 土: 0, 金: 0, 水: 0 }
+  const wuXingCount: Record<WuXing, number> = { 木: 0, 火: 0, 土: 0, 金: 0, 水: 0 }
   for (const p of pillars) {
     wuXingCount[p.ganWuXing]++
     wuXingCount[p.zhiWuXing]++

@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import { Noto_Sans_TC, Noto_Serif_TC } from 'next/font/google'
 import { NextIntlClientProvider } from 'next-intl'
 import { getLocale, getMessages } from 'next-intl/server'
+import { AuthProvider } from '@/components/AuthProvider'
 import Header from '@/components/Header'
 import { SITE_URL, siteConfig } from '@/configs/site'
 import './globals.css'
@@ -88,8 +89,10 @@ export default async function RootLayout({
     >
       <body className="flex min-h-full flex-col">
         <NextIntlClientProvider messages={messages}>
-          <Header />
-          <div className="flex-1">{children}</div>
+          <AuthProvider>
+            <Header />
+            <div className="flex-1">{children}</div>
+          </AuthProvider>
         </NextIntlClientProvider>
       </body>
     </html>

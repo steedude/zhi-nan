@@ -1,6 +1,7 @@
 import { Ratelimit } from '@upstash/ratelimit'
 import { Redis } from '@upstash/redis'
-import { ANON_DAILY_LIMIT, PER_MINUTE_LIMIT } from '@/configs/quota'
+import { ANON_DAILY_LIMIT, MEMBER_DAILY_LIMIT, PER_MINUTE_LIMIT } from '@/configs/quota'
+import { CONSUME_DAILY_QUOTA } from '@/lib/server/daily-quota'
 import { env, isUpstashEnvConfigured } from '@/env'
 import { todayTaipei } from '@/utils/date'
 
@@ -22,14 +23,6 @@ const minuteLimiter =
     prefix: 'zhi-nan:minute',
   })
 
-const anonDailyLimiter =
-  redis &&
-  new Ratelimit({
-    redis,
-    limiter: Ratelimit.fixedWindow(ANON_DAILY_LIMIT, '1 d'),
-    prefix: 'zhi-nan:anon-day',
-  })
-
 export async function isMinuteLimited(ip: string): Promise<boolean> {
   if (minuteLimiter) {
     const result = await minuteLimiter.limit(ip)
@@ -44,17 +37,37 @@ export async function isMinuteLimited(ip: string): Promise<boolean> {
 }
 
 export async function isAnonDailyLimited(ip: string): Promise<boolean> {
+  return isDailyLimited(`anon:${ip}`, ANON_DAILY_LIMIT)
+}
+
+export async function isMemberDailyLimited(userId: string): Promise<boolean> {
+  return isDailyLimited(`member:${userId}`, MEMBER_DAILY_LIMIT)
+}
+
+async function isDailyLimited(identity: string, limit: number): Promise<boolean> {
   const today = todayTaipei()
-  if (anonDailyLimiter) {
-    const result = await anonDailyLimiter.limit(`${ip}:${today}`)
-    return !result.success
+  if (redis) {
+    const allowed = await redis.eval<[number], number>(
+      CONSUME_DAILY_QUOTA,
+      [`zhi-nan:daily:${identity}:${today}`],
+      [limit],
+    )
+    return allowed !== 1
+  }
+  if (process.env.NODE_ENV === 'production') {
+    throw new Error('Daily quota requires Upstash Redis in production')
   }
 
-  const entry = dayHits.get(ip)
+  // 記憶體備援僅供本機開發，不能作為正式環境的跨實例額度。
+  for (const [key, value] of dayHits) {
+    if (value.date !== today) dayHits.delete(key)
+  }
+  const entry = dayHits.get(identity)
   if (!entry || entry.date !== today) {
-    dayHits.set(ip, { date: today, count: 1 })
+    dayHits.set(identity, { date: today, count: 1 })
     return false
   }
+  if (entry.count >= limit) return true
   entry.count++
-  return entry.count > ANON_DAILY_LIMIT
+  return false
 }

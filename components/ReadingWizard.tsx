@@ -14,23 +14,23 @@ import { isSupabaseConfigured } from '@/lib/supabase/client'
 
 /** 首頁流程容器：只負責把三個步驟與結果區塊組起來。 */
 export default function ReadingWizard() {
-  const { user } = useUser()
+  const { user, loading: userLoading, openAuth } = useUser()
   const home = useTranslations('home')
   const flow = useReadingFlow()
 
   return (
     <main className="min-h-screen">
-      <div className="mx-auto max-w-2xl px-5 py-12 sm:py-16">
+      <div className="page-container py-12 sm:py-16">
         <header className="mb-8 text-center">
-          <h1 className="font-display text-4xl font-semibold tracking-[0.3em] text-stone-800 sm:text-5xl">
+          <h1 className="font-display text-4xl font-semibold tracking-[0.3em] text-foreground sm:text-5xl">
             指 南
           </h1>
-          <div className="mx-auto mt-4 flex items-center justify-center gap-3 text-teal-700/70">
-            <span className="h-px w-12 bg-gradient-to-r from-transparent to-teal-700/50" />
+          <div className="mx-auto mt-4 flex items-center justify-center gap-3 text-primary/70">
+            <span className="h-px w-12 bg-gradient-to-r from-transparent to-primary/50" />
             <span className="text-xs">✦</span>
-            <span className="h-px w-12 bg-gradient-to-l from-transparent to-teal-700/50" />
+            <span className="h-px w-12 bg-gradient-to-l from-transparent to-primary/50" />
           </div>
-          <p className="mt-4 text-sm text-stone-500">{home('tagline')}</p>
+          <p className="mt-4 text-sm text-muted-foreground">{home('tagline')}</p>
         </header>
 
         <StepIndicator current={flow.stepIndex} />
@@ -69,12 +69,12 @@ export default function ReadingWizard() {
               error={flow.error}
             />
 
-            {!flow.streaming && isSupabaseConfigured && !user && (
-              <Card className="animate-fade-up flex flex-col items-center gap-3 border-teal-200 bg-gradient-to-b from-teal-50 to-transparent p-5 text-center sm:flex-row sm:justify-between sm:text-left">
-                <p className="text-sm text-stone-600">{home('bannerText')}</p>
+            {!flow.streaming && !userLoading && isSupabaseConfigured && !user && (
+              <Card className="animate-fade-up flex flex-col items-center gap-3 border-primary/20 bg-gradient-to-b from-accent to-transparent p-5 text-center sm:flex-row sm:justify-between sm:text-left">
+                <p className="text-sm text-secondary-foreground">{home('bannerText')}</p>
                 <Button
                   type="button"
-                  onClick={() => window.dispatchEvent(new CustomEvent('open-auth'))}
+                  onClick={openAuth}
                   variant="brand"
                   className="shrink-0"
                 >
@@ -88,7 +88,7 @@ export default function ReadingWizard() {
                 type="button"
                 onClick={flow.reset}
                 variant="outline"
-                className="w-full border-stone-300 text-stone-500 hover:text-stone-700"
+                className="w-full"
               >
                 {home('askAgain')}
               </Button>
@@ -96,7 +96,7 @@ export default function ReadingWizard() {
           </div>
         )}
 
-        <footer className="mt-12 text-center text-xs text-stone-400">
+        <footer className="mt-12 text-center text-xs text-muted-foreground">
           {home('footerLine1')}
           <br />
           {home('footerLine2')}

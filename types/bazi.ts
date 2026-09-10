@@ -5,6 +5,8 @@
  * 供 lib/(計算)、components/(顯示)、app/api/(傳輸)共用。
  */
 
+export type WuXing = '木' | '火' | '土' | '金' | '水'
+
 export type Gender = 'male' | 'female'
 
 export interface Pillar {
@@ -12,8 +14,8 @@ export interface Pillar {
   label: string
   gan: string
   zhi: string
-  ganWuXing: string
-  zhiWuXing: string
+  ganWuXing: WuXing
+  zhiWuXing: WuXing
   /** 地支藏干 */
   hideGan: string[]
   /** 天干十神(日柱為「日主」) */
@@ -34,9 +36,9 @@ export interface BaziChart {
   shengXiao: string
   pillars: Pillar[]
   dayMaster: string
-  dayMasterWuXing: string
+  dayMasterWuXing: WuXing
   /** 八字(四干四支)五行分布,鍵為 木火土金水 */
-  wuXingCount: Record<string, number>
+  wuXingCount: Record<WuXing, number>
   /** 大運前六步 */
   daYun: DaYun[]
 }

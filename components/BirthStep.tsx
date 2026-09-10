@@ -9,13 +9,7 @@ import { enUS, zhTW } from 'date-fns/locale'
 import { CalendarIcon } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Calendar } from '@/components/ui/calendar'
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card'
+import StepCard from '@/components/StepCard'
 import { Label } from '@/components/ui/label'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import {
@@ -71,136 +65,138 @@ export default function BirthStep({
   }
 
   return (
-    <Card className="animate-fade-up">
-      <CardHeader className="p-6 pb-5 sm:p-8 sm:pb-5">
-        <CardTitle>{t('title')}</CardTitle>
-        <CardDescription>{t('desc')}</CardDescription>
-      </CardHeader>
-
-      <CardContent className="space-y-4 p-6 pt-0 sm:p-8 sm:pt-0">
-        <div>
-          <Label htmlFor="birth-date" className="mb-1 block text-stone-600">
-            {t('dateLabel')}
-          </Label>
-          <Popover open={dateOpen} onOpenChange={setDateOpen}>
-            <PopoverTrigger asChild>
-              <Button
-                id="birth-date"
-                type="button"
-                variant="outline"
-                className="h-11 w-full justify-start rounded-xl border-input bg-white/90 px-3 text-left font-normal text-foreground"
-              >
-                <CalendarIcon className="size-4 text-stone-400" />
-                {selectedDate ? (
-                  formatDateInput(selectedDate)
-                ) : (
-                  <span className="text-muted-foreground">YYYY-MM-DD</span>
-                )}
-              </Button>
-            </PopoverTrigger>
-            <PopoverContent
-              className="w-[20rem] max-w-[calc(100vw-2rem)] p-3"
-              align="start"
+    <StepCard title={t('title')} description={t('desc')} className="space-y-4">
+      <div>
+        <Label htmlFor="birth-date" className="mb-1 block text-secondary-foreground">
+          {t('dateLabel')}
+        </Label>
+        <Popover open={dateOpen} onOpenChange={setDateOpen}>
+          <PopoverTrigger asChild>
+            <Button
+              id="birth-date"
+              type="button"
+              variant="outline"
+              className="h-11 w-full justify-start rounded-xl border-input bg-card/90 px-3 text-left font-normal text-foreground"
             >
-              <Calendar
-                mode="single"
-                selected={selectedDate}
-                defaultMonth={selectedDate}
-                locale={DATE_PICKER_LOCALES[locale]}
-                startMonth={new Date(1900, 0)}
-                endMonth={new Date(2100, 11)}
-                disabled={{ before: new Date(1900, 0, 1), after: new Date(2100, 11, 31) }}
-                onSelect={(nextDate) => {
-                  if (nextDate) {
-                    onDateChange(formatDateInput(nextDate))
-                    setDateOpen(false)
-                  }
-                }}
-              />
-            </PopoverContent>
-          </Popover>
-        </div>
-
-        <div>
-          <Label htmlFor="birth-time" className="mb-1 block text-stone-600">
-            {t('timeLabel')}
-          </Label>
-          <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-2">
-            <Select
-              value={hour}
-              onValueChange={(nextHour) => updateTime(nextHour, minute)}
-            >
-              <SelectTrigger id="birth-hour" className="bg-white/90">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {Array.from({ length: 24 }, (_, i) => {
-                  const value = String(i).padStart(2, '0')
-                  return (
-                    <SelectItem key={value} value={value}>
-                      {value}
-                    </SelectItem>
-                  )
-                })}
-              </SelectContent>
-            </Select>
-            <span className="text-stone-400">:</span>
-            <Select
-              value={minute}
-              onValueChange={(nextMinute) => updateTime(hour, nextMinute)}
-            >
-              <SelectTrigger id="birth-minute" className="bg-white/90">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {Array.from({ length: 60 }, (_, i) => {
-                  const value = String(i).padStart(2, '0')
-                  return (
-                    <SelectItem key={value} value={value}>
-                      {value}
-                    </SelectItem>
-                  )
-                })}
-              </SelectContent>
-            </Select>
-          </div>
-        </div>
-
-        <div>
-          <Label className="mb-1 block text-stone-600">{t('genderLabel')}</Label>
-          <ToggleGroup
-            type="single"
-            value={gender}
-            onValueChange={(value) => {
-              if (value === 'female' || value === 'male') onGenderChange(value)
-            }}
-            className="grid grid-cols-2 gap-3"
+              <CalendarIcon className="size-4 text-muted-foreground" />
+              {selectedDate ? (
+                formatDateInput(selectedDate)
+              ) : (
+                <span className="text-muted-foreground">YYYY-MM-DD</span>
+              )}
+            </Button>
+          </PopoverTrigger>
+          <PopoverContent
+            className="w-[20rem] max-w-[calc(100vw-2rem)] p-3"
+            align="start"
           >
-            {(['female', 'male'] as const).map((g) => (
-              <ToggleGroupItem key={g} value={g} size="lg">
-                {g === 'female' ? t('female') : t('male')}
-              </ToggleGroupItem>
-            ))}
-          </ToggleGroup>
-        </div>
+            <Calendar
+              mode="single"
+              selected={selectedDate}
+              defaultMonth={selectedDate}
+              locale={DATE_PICKER_LOCALES[locale]}
+              startMonth={new Date(1900, 0)}
+              endMonth={new Date(2100, 11)}
+              disabled={{ before: new Date(1900, 0, 1), after: new Date(2100, 11, 31) }}
+              onSelect={(nextDate) => {
+                if (nextDate) {
+                  onDateChange(formatDateInput(nextDate))
+                  setDateOpen(false)
+                }
+              }}
+            />
+          </PopoverContent>
+        </Popover>
+      </div>
 
-        {error && <p className="text-sm text-red-600">{error}</p>}
-
-        <div className="flex gap-3 pt-2">
-          <Button type="button" onClick={onBack} disabled={loading} variant="outline">
-            {t('back')}
-          </Button>
-          <Button
-            type="button"
-            onClick={onSubmit}
-            disabled={loading}
-            variant="brand"
-            className="flex-1"
+      <div>
+        <Label
+          id="birth-time-label"
+          htmlFor="birth-hour"
+          className="mb-1 block text-secondary-foreground"
+        >
+          {t('timeLabel')}
+        </Label>
+        <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-2">
+          <Select value={hour} onValueChange={(nextHour) => updateTime(nextHour, minute)}>
+            <SelectTrigger
+              id="birth-hour"
+              aria-label={t('hourLabel')}
+              className="bg-card/90"
+            >
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {Array.from({ length: 24 }, (_, i) => {
+                const value = String(i).padStart(2, '0')
+                return (
+                  <SelectItem key={value} value={value}>
+                    {value}
+                  </SelectItem>
+                )
+              })}
+            </SelectContent>
+          </Select>
+          <span className="text-muted-foreground">:</span>
+          <Select
+            value={minute}
+            onValueChange={(nextMinute) => updateTime(hour, nextMinute)}
           >
-            {loading ? t('submitting') : t('submit')}
-          </Button>
+            <SelectTrigger
+              id="birth-minute"
+              aria-label={t('minuteLabel')}
+              className="bg-card/90"
+            >
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {Array.from({ length: 60 }, (_, i) => {
+                const value = String(i).padStart(2, '0')
+                return (
+                  <SelectItem key={value} value={value}>
+                    {value}
+                  </SelectItem>
+                )
+              })}
+            </SelectContent>
+          </Select>
         </div>
-      </CardContent>
-    </Card>
+      </div>
+
+      <div>
+        <Label className="mb-1 block text-secondary-foreground">{t('genderLabel')}</Label>
+        <ToggleGroup
+          type="single"
+          value={gender}
+          onValueChange={(value) => {
+            if (value === 'female' || value === 'male') onGenderChange(value)
+          }}
+          className="grid grid-cols-2 gap-3"
+        >
+          {(['female', 'male'] as const).map((g) => (
+            <ToggleGroupItem key={g} value={g} size="lg">
+              {g === 'female' ? t('female') : t('male')}
+            </ToggleGroupItem>
+          ))}
+        </ToggleGroup>
+      </div>
+
+      {error && <p className="text-sm text-destructive">{error}</p>}
+
+      <div className="flex gap-3 pt-2">
+        <Button type="button" onClick={onBack} disabled={loading} variant="outline">
+          {t('back')}
+        </Button>
+        <Button
+          type="button"
+          onClick={onSubmit}
+          disabled={loading}
+          variant="brand"
+          className="flex-1"
+        >
+          {loading ? t('submitting') : t('submit')}
+        </Button>
+      </div>
+    </StepCard>
   )
 }

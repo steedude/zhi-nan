@@ -15,7 +15,7 @@ function Card({
     <Comp
       data-slot="card"
       className={cn(
-        'text-card-foreground rounded-2xl border border-stone-300/60 bg-gradient-to-b from-[#fffefb] to-[#faf8f2] shadow-[0_10px_32px_rgba(68,60,48,0.09),inset_0_1px_0_rgba(255,255,255,0.7)]',
+        'text-card-foreground rounded-2xl border border-border/60 bg-gradient-to-b from-card to-card-end shadow-panel',
         className,
       )}
       {...props}
@@ -33,11 +33,11 @@ function CardHeader({ className, ...props }: ComponentProps<'div'>) {
   )
 }
 
-function CardTitle({ className, ...props }: ComponentProps<'div'>) {
+function CardTitle({ className, ...props }: ComponentProps<'h2'>) {
   return (
-    <div
+    <h2
       data-slot="card-title"
-      className={cn('font-display text-xl text-stone-800', className)}
+      className={cn('font-display text-xl text-foreground', className)}
       {...props}
     />
   )
@@ -47,7 +47,7 @@ function CardDescription({ className, ...props }: ComponentProps<'div'>) {
   return (
     <div
       data-slot="card-description"
-      className={cn('text-sm text-stone-500', className)}
+      className={cn('text-sm text-muted-foreground', className)}
       {...props}
     />
   )

@@ -7,10 +7,10 @@ import { env } from '@/env'
  * 之後要加付費方案時只需要改這裡與額度檢查處。
  */
 
-/** 訪客每日解讀次數(記憶體計數/IP,盡力而為) */
+/** 訪客每日解讀次數，以 IP 在 Redis 計數。 */
 export const ANON_DAILY_LIMIT = env.ANON_DAILY_LIMIT
 
-/** 會員每日解讀次數(readings 資料表計數,跨實例準確) */
+/** 會員每日解讀次數，以 user id 在 Redis 計數。 */
 export const MEMBER_DAILY_LIMIT = env.MEMBER_DAILY_LIMIT
 
 /** 每 IP 每分鐘請求上限 */

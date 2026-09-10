@@ -53,6 +53,8 @@ export const en = {
     desc: 'Use the solar (Gregorian) calendar. The hour affects the Hour Pillar — be as precise as you can; minutes can be 00 if unsure.',
     dateLabel: 'Date of birth (solar)',
     timeLabel: 'Time of birth',
+    hourLabel: 'Birth hour',
+    minuteLabel: 'Birth minute',
     genderLabel: 'Sex (for luck pillars)',
     female: 'Female',
     male: 'Male',
@@ -112,5 +114,9 @@ export const en = {
     expand: 'Expand ▼',
     collapse: 'Collapse ▲',
     remove: 'Delete this reading',
+    removing: 'Deleting…',
+    errLoad: 'Could not load readings. Please try again.',
+    errRemove: 'Could not delete this reading. It has been kept; please try again.',
+    retry: 'Reload',
   },
 } satisfies Dictionary

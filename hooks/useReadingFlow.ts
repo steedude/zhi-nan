@@ -53,7 +53,7 @@ export function useReadingFlow() {
       onChunk: (chunk) => setInterpretation((prev) => prev + chunk),
     })
 
-    if (!result.ok) setError(result.error ?? home('errUnknown'))
+    if (!result.ok && !result.aborted) setError(result.error ?? home('errUnknown'))
     setStreaming(false)
   }
 

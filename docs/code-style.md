@@ -84,7 +84,7 @@ utils/        無副作用小工具函式
 
 - 所有環境變數由 [`env.ts`](../env.ts) 以 Zod 驗證。
 - 本機開發可不設定 Upstash,會退回記憶體限流。
-- 正式 serverless 部署建議設定 `UPSTASH_REDIS_REST_URL` / `UPSTASH_REDIS_REST_TOKEN`,避免多實例造成限流不準。
+- 正式環境必須設定 `UPSTASH_REDIS_REST_URL` / `UPSTASH_REDIS_REST_TOKEN`,避免多實例造成限流不準。
 - Supabase 型別集中在 `types/database.ts`,client/server 都要帶入 `Database` generic。
 
 ## 測試策略
@@ -98,5 +98,6 @@ utils/        無副作用小工具函式
 
 ```bash
 pnpm playwright:install
+pnpm build
 pnpm test:e2e
 ```

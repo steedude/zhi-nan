@@ -1,204 +1,87 @@
 # 指南 Architecture
 
-`指南` 是一個 AI 八字決策指引產品。核心設計是「程式負責排盤，AI 負責解讀」：命盤資料由 `lunar-typescript` 依出生資料確定性計算，再把結構化命盤與使用者問題交給 Gemini 生成文字解讀。
+程式負責排盤，AI 負責解讀。前端先排盤以立即呈現；伺服器驗證輸入並重新排盤，再交給 Gemini。
 
-## 系統流程
+## 請求流程
 
-```txt
-使用者輸入問題
-  ↓
-QuestionStep
-  ↓
-使用者輸入出生日期、時間、性別
-  ↓
-BirthStep
-  ↓
-useReadingFlow
-  ├─ 前端 computeBazi()：立即顯示命盤
-  └─ useInterpretationStream：POST /api/interpret
-       ↓
-       Route Handler 驗證 request
-       ↓
-       Upstash Redis / memory fallback 限流
-       ↓
-       Supabase 會員與每日額度檢查
-       ↓
-       後端 computeBazi()：產生可信任命盤
-       ↓
-       Gemini generateContentStream()
-       ↓
-       HTTP ReadableStream 回前端
-       ↓
-       會員解讀完成後寫入 Supabase readings
+```text
+QuestionStep → BirthStep → useReadingFlow
+  ├─ computeBazi → 命盤
+  └─ useInterpretationStream → POST /api/interpret
+       → 輸入驗證
+       → Supabase 驗證 session
+       → 每分鐘限流、每日額度原子扣除
+       → computeBazi → Gemini stream
+       → HTTP 文字串流
+       → 完成後儲存會員 readings
 ```
 
-## 前端分層
+## 前端職責
 
-| 位置                                | 職責                                     |
-| ----------------------------------- | ---------------------------------------- |
-| `app/page.tsx`                      | 首頁 route，渲染 `ReadingWizard`         |
-| `components/ReadingWizard.tsx`      | 純畫面組合，根據目前步驟渲染子元件       |
-| `hooks/useReadingFlow.ts`           | 管理三步驟流程、表單狀態、命盤與解讀狀態 |
-| `hooks/useInterpretationStream.ts`  | 呼叫 AI API，讀取文字串流                |
-| `components/QuestionStep.tsx`       | 問題分類與問題輸入                       |
-| `components/BirthStep.tsx`          | 出生日期、時間、性別輸入                 |
-| `components/BaziChartCard.tsx`      | 命盤視覺化                               |
-| `components/InterpretationCard.tsx` | AI 解讀文字、複製內容、錯誤訊息          |
-| `components/ui/*`                   | shadcn/ui 風格基礎元件                   |
+| 模組                    | 職責                                                |
+| ----------------------- | --------------------------------------------------- |
+| app/page.tsx            | Server Component 入口                               |
+| ReadingWizard           | 組合步驟、命盤與解讀                                |
+| useReadingFlow          | 表單、步驟及結果狀態                                |
+| useInterpretationStream | 讀取 UTF-8 串流、API 錯誤、離頁取消                 |
+| StepCard                | 兩個輸入步驟共用標題、描述與間距                    |
+| BaziChartCard           | 命盤組合，內部分為 PillarCard 與 WuXingDistribution |
+| InterpretationContent   | 首頁與歷史頁共用段落、標題排版                      |
+| InterpretationCard      | 串流、錯誤、複製與免責文字                          |
+| AuthProvider / useUser  | 全站共用登入狀態與 openAuth，不使用全域字串事件     |
+| useReadings             | 歷史查詢、刪除、載入與錯誤狀態                      |
+| ReadingHistoryItem      | 單筆紀錄、展開與刪除按鈕                            |
 
-## 後端分層
+`AuthProvider` 位於 next-intl provider 內，因此登入視窗使用同一份語系。初始查詢不覆蓋較新的登入／登出事件。
 
-| 位置                              | 職責                                            |
-| --------------------------------- | ----------------------------------------------- |
-| `app/api/interpret/route.ts`      | API 流程入口，負責串接各 helper                 |
-| `lib/server/interpret/session.ts` | 取得 Supabase session，未設定時視為訪客         |
-| `lib/server/interpret/quota.ts`   | 每分鐘限流、訪客每日額度、會員每日額度          |
-| `lib/server/interpret/stream.ts`  | Gemini stream → HTTP stream，完成後儲存會員紀錄 |
-| `lib/server/rate-limit.ts`        | Upstash Redis / memory fallback 限流            |
-| `lib/server/readings.ts`          | 查詢會員今日用量與儲存 readings                 |
-| `lib/server/ai/gemini.ts`         | Google Gemini SDK 呼叫                          |
-| `lib/server/api-errors.ts`        | API error response 與 Sentry 上報               |
-| `lib/server/request.ts`           | locale、request body、client IP 解析            |
+歷史清單以 user id 為 React key 掛載，切換帳號時丟棄舊狀態。過期查詢不覆蓋新查詢；刪除必須確認資料庫實際回傳刪除的 id，失敗時保留畫面資料並提供提示。
 
-## Domain types
+## 樣式與型別
 
-主要型別放在：
+- `app/globals.css` 定義語意色彩、陰影、字型、容器與動畫；支援減少動態效果偏好。
+- `components/ui/` 提供 Button、Card、Dialog 等基礎樣式，頁面只補版面差異。
+- `configs/wuxing.ts` 合併五行文字、長條與漸層配色。
+- `types/bazi.ts` 的 WuXing 為五個明確值，避免任意字串索引造成配色遺漏。
+- API 輸入由 `lib/validation/interpret.ts` 的 Zod schema 驗證。
 
-- `types/bazi.ts`：八字命盤、四柱、大運、出生資料
-- `types/reading.ts`：產品流程、問題、出生表單、API payload
-- `types/i18n.ts`：支援語系與字典型別
+## 後端職責
 
-這樣做的目標是讓 UI state、API payload、命盤資料各自有清楚語意，不用靠一堆散落的 primitive 參數理解流程。
+| 模組                            | 職責                                     |
+| ------------------------------- | ---------------------------------------- |
+| app/api/interpret/route.ts      | 驗證及協調服務                           |
+| lib/server/interpret/session.ts | 驗證會員 session                         |
+| lib/server/interpret/quota.ts   | 依會員身分選擇每日額度                   |
+| lib/server/rate-limit.ts        | 每分鐘限流、以台北日期建立每日 Redis key |
+| lib/server/daily-quota.ts       | Redis Lua 原子檢查與遞增                 |
+| lib/server/interpret/stream.ts  | Gemini → HTTP stream，完成後儲存         |
+| lib/server/readings.ts          | 保存會員紀錄                             |
+| lib/server/api-errors.ts        | 翻譯錯誤訊息與 Sentry 上報               |
 
-## AI 與 token 策略
+每分鐘限流沿用 Upstash sliding window。每日額度使用：
 
-相關檔案：
-
-- `lib/prompt.ts`
-- `configs/gemini.ts`
-- `lib/server/ai/gemini.ts`
-
-策略：
-
-1. 固定規則放在 `SYSTEM_INSTRUCTION`，每次請求保持一致。
-2. 命盤由 `buildUserContent()` 序列化為緊湊格式。
-3. AI 只接收「已算好的命盤」，不重新排盤。
-4. `thinkingBudget: 0` 與 `maxOutputTokens` 控制成本與輸出長度。
-
-## 限流與額度
-
-相關檔案：
-
-- `lib/server/rate-limit.ts`
-- `lib/server/interpret/quota.ts`
-- `configs/quota.ts`
-
-機制：
-
-- 每 IP 每分鐘限流：`Ratelimit.slidingWindow(PER_MINUTE_LIMIT, '1 m')`
-- 訪客每日限流：`Ratelimit.fixedWindow(ANON_DAILY_LIMIT, '1 d')`
-- 會員每日限流：查 Supabase `readings` 今天的筆數
-
-Redis key prefix：
-
-```txt
-zhi-nan:minute
-zhi-nan:anon-day
+```text
+zhi-nan:daily:anon:{ip}:{taipeiDate}
+zhi-nan:daily:member:{userId}:{taipeiDate}
 ```
 
-如果沒有設定 Upstash，會退回本機記憶體 `Map`，方便本機開發。
+每日 key 的有效期為 48 小時，以日期區分額度，不會在 UTC 午夜把台北當天的額度重置。超額請求不增加計數。
 
-## 會員、資料與隱私
+扣額度發生在生成前；後續失敗不退回額度。讀取、保存、刪除 readings 都不影響計數。正式環境 Redis 缺少設定或不可用時拒絕請求；記憶體備援僅供開發。
 
-相關檔案：
+首次升級改用新的每日 key，當天由新 key 起算；無需資料庫 migration。正式部署需要確保 Upstash 設定存在。
 
-- `lib/supabase/client.ts`
-- `lib/supabase/server.ts`
-- `lib/server/readings.ts`
-- `app/history/page.tsx`
-- `supabase/schema.sql`
+## 錯誤與資料保存
 
-訪客資料不儲存。會員登入後，解讀完成才會寫入 `readings`。資料存取由 Supabase RLS 控制，每個使用者只能讀寫自己的紀錄。
-
-## 錯誤處理與監控
-
-相關檔案：
-
-- `lib/errors.ts`
-- `lib/server/api-errors.ts`
-- `app/error.tsx`
-- `app/global-error.tsx`
-- `instrumentation.ts`
-- `instrumentation-client.ts`
-- `sentry.server.config.ts`
-- `sentry.edge.config.ts`
-
-API 錯誤統一回傳：
-
-```json
-{
-  "code": "RATE_LIMITED",
-  "message": "請稍微放慢一點，等一下再重新送出。",
-  "error": "請稍微放慢一點，等一下再重新送出。"
-}
-```
-
-會送 Sentry：
-
-- Gemini API 失敗
-- Gemini stream 中斷
-- Supabase 查額度/儲存失敗
-- React render error
-
-不送 Sentry：
-
-- 使用者輸入錯
-- 每分鐘限流
-- 訪客/會員額度用完
-- 剪貼簿權限失敗
-
-## SEO 與分享
-
-相關檔案：
-
-- `configs/site.ts`
-- `app/layout.tsx`
-- `app/sitemap.ts`
-- `app/robots.ts`
-- `app/opengraph-image.tsx`
-- `app/twitter-image.tsx`
-- `app/manifest.ts`
-
-`NEXT_PUBLIC_SITE_URL` 會影響：
-
-- canonical URL
-- Open Graph URL
-- sitemap URL
-- robots 裡的 sitemap 位置
-- OG image 文字上的網域
+- 輸入錯誤與超額：回傳翻譯後的 400／429，不上報 Sentry。
+- AI、Redis、Supabase 服務失敗：上報 Sentry。
+- 串流中斷：前端顯示錯誤並保留已收到的文字；離頁時取消前端請求。
+- 會員解讀完成才寫入 Supabase。寫入失敗會上報，目前不阻斷已產生的解讀。
+- Supabase RLS 限制本人存取；訪客解讀不保存。
 
 ## 測試
 
-| 測試                     | 用途                         |
-| ------------------------ | ---------------------------- |
-| `tests/bazi.test.ts`     | 驗證排盤資料基本存在與格式   |
-| `tests/utils.test.ts`    | 驗證工具函式                 |
-| `tests/e2e/home.spec.ts` | 驗證使用者能走完主要首頁流程 |
+單元／元件測試涵蓋排盤、共享登入訂閱、歷史查詢重試與刪除失敗、UTF-8 串流、取消、錯誤後的內容保留、額度分流。
 
-常用指令：
+Redis 整合測試在本機容器執行真實 Lua，驗證並行上限、拒絕後計數、到期時間及使用者／日期隔離。執行方式見 README。
 
-```bash
-pnpm lint
-pnpm typecheck
-pnpm test:run
-pnpm build
-pnpm test:e2e
-```
-
-## 設計取捨
-
-- 前後端都呼叫 `computeBazi()`：前端為了即時體驗，後端為了可信任資料。
-- AI 使用 stream：讓使用者看到文字逐段出現，降低等待感。
-- 訪客每日額度用 Redis：不需要會員也能控制成本。
-- 會員每日額度用 Supabase：以實際儲存紀錄為準，跨裝置一致。
-- error code 集中管理：前端顯示、API response、Sentry tag 都能對齊。
+Playwright 使用正式建置、固定日期與模擬 API，驗證完整流程、額度錯誤、語系切換與手機寬度；不存取真實 AI。

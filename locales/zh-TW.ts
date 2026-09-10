@@ -50,6 +50,8 @@ export const zhTW = {
     desc: '請填陽曆(國曆)。時辰會影響時柱,盡量填準確;不確定分鐘可以填 00。',
     dateLabel: '出生日期(陽曆)',
     timeLabel: '出生時間',
+    hourLabel: '出生小時',
+    minuteLabel: '出生分鐘',
     genderLabel: '性別(排大運用)',
     female: '女',
     male: '男',
@@ -108,5 +110,9 @@ export const zhTW = {
     expand: '展開 ▼',
     collapse: '收合 ▲',
     remove: '刪除這筆紀錄',
+    removing: '刪除中⋯⋯',
+    errLoad: '無法載入紀錄，請稍後重試。',
+    errRemove: '刪除失敗，紀錄仍保留，請稍後重試。',
+    retry: '重新載入',
   },
 }
