@@ -47,10 +47,25 @@ describe('quota routing', () => {
     expect(limiters.isAnonDailyLimited).not.toHaveBeenCalled()
     expect(limiters.isMemberDailyLimited).not.toHaveBeenCalled()
   })
-  it('fails closed when the quota store is unavailable', async () => {
-    limiters.isMemberDailyLimited.mockRejectedValue(new Error('Redis unavailable'))
-    await expect(
-      checkInterpretQuota({ ip: 'ip-1', locale: 'en', session: member }),
-    ).rejects.toThrow('Redis unavailable')
-  })
+  it.each(['isMinuteLimited', 'isMemberDailyLimited', 'isAnonDailyLimited'] as const)(
+    'returns service unavailable when %s cannot connect to Redis',
+    async (limiter) => {
+      limiters[limiter].mockRejectedValue(
+        new TypeError('fetch failed', {
+          cause: Object.assign(new Error('DNS lookup failed'), { code: 'ENOTFOUND' }),
+        }),
+      )
+      const response = await checkInterpretQuota({
+        ip: 'ip-1',
+        locale: 'en',
+        session: limiter === 'isAnonDailyLimited' ? guest : member,
+      })
+      expect(response?.status).toBe(503)
+      expect(await response?.json()).toEqual({ code: 'QUOTA_SERVICE_UNAVAILABLE' })
+      if (limiter === 'isMinuteLimited') {
+        expect(limiters.isMemberDailyLimited).not.toHaveBeenCalled()
+        expect(limiters.isAnonDailyLimited).not.toHaveBeenCalled()
+      }
+    },
+  )
 })

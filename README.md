@@ -65,6 +65,16 @@ pnpm dev
 
 ## 品質檢查
 
+### Redis 連線診斷
+
+部署前先執行 `pnpm check:redis`，使用本機 `.env.local` 檢查 DNS 與 REST PING；不讀寫業務資料、不扣額度，也不輸出 Token。在已注入環境變數的部署環境可執行 `node scripts/check-redis.mjs`。
+
+若 Sentry 出現 `getaddrinfo ENOTFOUND ...upstash.io`，代表 Redis 主機名稱無法解析；這個階段還沒開始呼叫 AI。請在 Upstash 後台確認資料庫狀態，重新複製同一資料庫的 REST URL 與 REST Token，更新部署平台的 `UPSTASH_REDIS_REST_URL`、`UPSTASH_REDIS_REST_TOKEN` 後重新部署。請勿只修改網址中的數字或動物名稱。
+
+Redis 不可用時 API 回傳 `503 QUOTA_SERVICE_UNAVAILABLE` 並上報 Sentry，不會自動略過額度限制。診斷命令通過後，再測試一次實際解讀。
+
+### 程式與畫面
+
 ```bash
 pnpm lint
 pnpm typecheck

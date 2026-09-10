@@ -14,6 +14,10 @@ export const ERROR_MESSAGES = {
     'zh-TW': '請稍微放慢一點，等一下再重新送出。',
     en: 'Too many requests. Please wait a moment and try again.',
   },
+  QUOTA_SERVICE_UNAVAILABLE: {
+    'zh-TW': '額度檢查服務暫時無法連線，請稍後再試。',
+    en: 'The usage limit service is temporarily unavailable. Please try again later.',
+  },
   MEMBER_QUOTA_EXCEEDED: {
     'zh-TW': `今日 ${MEMBER_DAILY_LIMIT} 次解讀額度已用完，明天再來吧。`,
     en: `You've used all ${MEMBER_DAILY_LIMIT} readings for today. Come back tomorrow.`,

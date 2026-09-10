@@ -24,15 +24,24 @@ export async function checkInterpretQuota({
   locale,
   session,
 }: QuotaInput): Promise<Response | null> {
-  if (await isMinuteLimited(ip)) return jsonError('RATE_LIMITED', locale, 429)
+  try {
+    if (await isMinuteLimited(ip)) return jsonError('RATE_LIMITED', locale, 429)
 
-  if (session.supabase && session.user) {
-    return (await isMemberDailyLimited(session.user.id))
-      ? jsonError('MEMBER_QUOTA_EXCEEDED', locale, 429)
+    if (session.supabase && session.user) {
+      return (await isMemberDailyLimited(session.user.id))
+        ? jsonError('MEMBER_QUOTA_EXCEEDED', locale, 429)
+        : null
+    }
+
+    return (await isAnonDailyLimited(ip))
+      ? jsonError('ANON_QUOTA_EXCEEDED', locale, 429)
       : null
+  } catch (cause) {
+    // 無法確認用量時暫停生成，避免 Redis 故障讓額度保護失效。
+    return jsonError('QUOTA_SERVICE_UNAVAILABLE', locale, 503, {
+      report: true,
+      cause,
+      context: { tags: { route: 'api.interpret', phase: 'quota' } },
+    })
   }
-
-  return (await isAnonDailyLimited(ip))
-    ? jsonError('ANON_QUOTA_EXCEEDED', locale, 429)
-    : null
 }
